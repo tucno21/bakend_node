@@ -467,6 +467,18 @@ class Model {
         return avgResult[0][avgColumn];
     }
 
+    async veryfyEmail(email: string) {
+        try {
+            const sql = `SELECT * FROM ${this.tableName} WHERE email = ?`;
+            const connect = await db;
+            const result = await connect.execute(sql, [email]);
+            const data = result[0].constructor === Array ? result[0][0] : result[0];
+            return data as RowDataPacket;
+        } catch (error: any) {
+            throw new Error(error.message);
+        }
+    }
+
 }
 
 export default new Model();
