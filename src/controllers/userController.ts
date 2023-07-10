@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import User from '../model/user';
 
 export const getUsers = async (req: Request, res: Response) => {
-    const data = await req.body;
-    console.log(data);
+    const { dataToken } = await req.body;
+
+    console.log(dataToken);
+
     const usuarios = await User.all();
 
     res.json({
