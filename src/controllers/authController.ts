@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../model/user';
 import { generateJWT } from '../helpers/jwt';
+import fileSave from '../helpers/fileSave';
+import fileDelete from '../helpers/fileDelete';
 const bcrypt = require('bcryptjs');
 
 export const getUser = async (req: Request, res: Response) => {
@@ -47,40 +49,96 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response): Promise<Response> => {
+    // try {
+    const { body } = req;
+
+    //buscar si el email existe
+    const comprobar = await User.where('email', body.email).first();
+
+    //si existe
+    if (comprobar) {
+        return res.status(400).json({
+            ok: false,
+            msg: 'El email ya existe'
+        });
+    }
+
+    const images = req.files;
+    const result = fileSave({ file: images!, fieldName: ['imagen'] });
+
+    if ('error' in result) return res.status(400).json(result);
+
+    const { imagen } = result.nameFiles;
+    //agregar imagen a body
+    body.imagen = imagen;
+
+    //encriptar password
+    const salt = bcrypt.genSaltSync();
+    body.password = bcrypt.hashSync(body.password, salt);
+
+    //guardar usuario
+    const usuario = await User.create(body);
+
+    //generar el token
+    const token = await generateJWT({ uid: usuario.id, email: usuario.email });
+
+    return res.json({
+        ok: true,
+        usuario,
+        token
+    });
+
+    // } catch (error: any) {
+    //     return res.status(500).json({
+    //         msg: 'Error en el servidor',
+    //         error: error.message
+    //     });
+    // }
+}
+
+export const updateUser = async (req: Request, res: Response): Promise<Response> => {
     try {
+        const { id } = req.params;
         const { body } = req;
 
-        //buscar si el email existe
-        const comprobar = await User.where('email', body.email).first();
+        const usuario = await User.where('id', id).first();
 
-        //si existe
-        if (comprobar) {
+        if (!usuario) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El email ya existe'
+                msg: 'No existe el usuario'
             });
         }
 
-        //encriptar password
-        const salt = bcrypt.genSaltSync();
-        body.password = bcrypt.hashSync(body.password, salt);
+        if (req.files) {
+            const result = fileSave({ file: req.files!, fieldName: ['imagen'] });
+            if ('error' in result) return res.status(400).json(result);
+            const { imagen } = result.nameFiles;
+
+            // eliminar la imagen anterior
+            fileDelete(usuario.imagen);
+
+            //agregar imagen a body
+            body.imagen = imagen;
+        }
+
+        if (body.password) {
+            //encriptar password
+            const salt = bcrypt.genSaltSync();
+            body.password = bcrypt.hashSync(body.password, salt);
+        }
 
         //guardar usuario
-        const usuario = await User.create(body);
-
-        //generar el token
-        const token = await generateJWT({ uid: usuario.id, email: usuario.email });
+        const usuarioActualizado = await User.update(usuario.id, body);
 
         return res.json({
             ok: true,
-            usuario,
-            token
+            usuario: usuarioActualizado
         });
 
-    } catch (error: any) {
+    } catch (error) {
         return res.status(500).json({
-            msg: 'Error en el servidor',
-            error: error.message
+            msg: 'Error interno del servidor'
         });
     }
 }

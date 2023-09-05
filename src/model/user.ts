@@ -1,22 +1,13 @@
-import model from "../core/model";
+import Model from "../core/model";
 
-model.define(
-    'users',
-    'id',
-    [
-        'name',
-        'lastname',
-        'email',
-        'phone',
-        'password',
-        'image'
-    ],
-    [
-        'password'
-    ],
-    true,
-    'created_at',
-    'updated_at'
-);
+class User extends Model {
+    protected tableName = 'usuarios';
+    protected primaryKey = 'id';
+    protected fillable = ['nombre', 'email', 'password', 'imagen'];
+    protected hidden = ['password'];
+    protected timestamps = true;
+    protected created = 'created_at';
+    protected updated = 'updated_at';
+}
 
-export default model;
+export default new User();

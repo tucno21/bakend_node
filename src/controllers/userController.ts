@@ -2,15 +2,23 @@ import { Request, Response } from 'express';
 import User from '../model/user';
 
 export const getUsers = async (req: Request, res: Response) => {
-    const { dataToken } = await req.body;
-
-    console.log(dataToken);
 
     const usuarios = await User.all();
 
+    const folderName = process.env.FOLDER_NAME || 'imagenes';
+    // url de imagen
+    const url = `${req.protocol}://${req.get('host')}/${folderName}/`;
+
+    const usuariosConImagen = usuarios.map(user => {
+        return {
+            ...user,
+            imagen: url + user.imagen
+        }
+    })
+
     res.json({
         msg: 'getUsers',
-        usuarios
+        usuarios: usuariosConImagen
     });
 }
 

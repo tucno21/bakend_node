@@ -1,43 +1,27 @@
 import { RowDataPacket } from 'mysql2';
 import db from '../database/mysql';
 
+interface CustomError extends Error {
+    code: number;
+}
 
 class Model {
-    tableName: string = '';
-    primaryKey: string = '';
-    fillable: string[] = [];
-    hidden: string[] = [];
-    timestamps: boolean = false;
-    created: string = '';
-    updated: string = '';
+    protected tableName: string = '';
+    protected primaryKey: string = 'id';
+    protected fillable: string[] = [];
+    protected hidden: string[] = [];
+    protected timestamps: boolean = false;
+    protected created: string = 'created_at';
+    protected updated: string = 'updated_at';
 
-    protected query: string = '';
-    protected existWhere: boolean = false;
-    protected wheree: string[] = [];
-    protected joinn: string[] = [];
-    protected selectt: string = '*';
-    protected orderby: string = '';
-    protected limitt: string = '';
-    protected values: any[] = [];
-
-
-    define(
-        tableName: string,
-        primaryKey: string,
-        fillable: string[],
-        hidden: string[] = [],
-        timestamps: boolean = false,
-        created: string = '',
-        updated: string = ''
-    ) {
-        this.tableName = tableName;
-        this.primaryKey = primaryKey;
-        this.fillable = fillable;
-        this.hidden = hidden;
-        this.timestamps = timestamps;
-        this.created = created;
-        this.updated = updated;
-    }
+    private query: string = '';
+    private existWhere: boolean = false;
+    private wheree: string[] = [];
+    private joinn: string[] = [];
+    private selectt: string = '*';
+    private orderby: string = '';
+    private limitt: string = '';
+    private values: any[] = [];
 
     private getFields(): string[] {
         //elimino los campos que esta en hidden del array de fillable
@@ -176,25 +160,19 @@ class Model {
             //armamos la consulta
             const sql = `DELETE FROM ${this.tableName} WHERE ${this.primaryKey} = ?`;
 
-            // console.log(this.timestamps);
-            // console.log(sql);
-            // console.log(values);
-
             const connect = await db;
             const [result] = await connect.execute(sql, [id]);
             const affectedRows = (result as any).affectedRows;
+            // console.log(affectedRows);
 
-            if (affectedRows === 0) {
-                throw new Error('El registro no existe');
-            }
+            return affectedRows === 0 ? false : true;
 
-            return true;
         } catch (error: any) {
             throw new Error(error.message);
         }
     }
 
-    validate(data: object): void {
+    private validate(data: object): void {
         //verificar que data tenga los campos de fillable caso contrario lanzar error y detener la ejecucion
         const validate = this.fillable.every((item: string) => Object.keys(data).includes(item));
         if (!validate) {
@@ -202,7 +180,7 @@ class Model {
         }
     }
 
-    validateFillable(data: object): void {
+    private validateFillable(data: object): void {
         //validar que lo que se envia en data exista en fillable caso contrario lanzar error y detener la ejecucion
         const validate = Object.keys(data).every((item: string) => this.fillable.includes(item));
         if (!validate) {
@@ -294,7 +272,7 @@ class Model {
         return this;
     }
 
-    protected async executeResult(query: string) {
+    private async executeResult(query: string) {
         const connect = await db;
         const result = await connect.execute(query, this.values);
 
@@ -344,7 +322,7 @@ class Model {
                 this.query = `SELECT ${select} FROM ${this.tableName} ${join} ${orderby} ${limit}`;
             }
 
-            console.log(this.query);
+            // console.log(this.query);
 
             const result = await this.executeResult(this.query);
             const data = result[0].constructor === Array ? result[0] : result;
@@ -478,12 +456,7 @@ class Model {
             throw new Error(error.message);
         }
     }
-
 }
 
-export default new Model();
-
-
-interface CustomError extends Error {
-    code: number;
-}
+// export default new Model();
+export default Model;

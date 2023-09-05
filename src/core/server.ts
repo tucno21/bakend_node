@@ -1,9 +1,11 @@
 import express, { Application } from 'express';
+import fileUpload from 'express-fileupload';
 import cors from 'cors';
 import router from './route';
 
 class Server {
 
+    // private app: express.Application;
     private app: Application;
     private port: string;
     private initParh: string = `/${process.env.NAME_INIT_PATH}` || '/api';
@@ -25,6 +27,8 @@ class Server {
         this.app.use(express.json());
         //directorio publico
         this.app.use(express.static('public'));
+        // Habilitar fileUpload
+        this.app.use(fileUpload());
     }
 
     routes() {

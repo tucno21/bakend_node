@@ -6,9 +6,17 @@ export const validarCampos = (req: Request, res: Response, next: NextFunction): 
     const errores = validationResult(req);
 
     if (!errores.isEmpty()) {
+        const erroresFormateados: { [campo: string]: string } = {}; // Tipo explícito
+
+        // Itera sobre los errores mapeados y crea un nuevo objeto con el formato deseado
+        for (const campo in errores.mapped()) {
+            erroresFormateados[campo] = errores.mapped()[campo].msg;
+        }
+
         return res.status(400).json({
-            ok: false,
-            errores: errores.mapped()
+            status: false,
+            // errores: errores.mapped()
+            errores: erroresFormateados
         })
     }
 

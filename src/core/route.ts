@@ -21,7 +21,7 @@ archivos.filter((archivo: string) => {
     const archivoSinExtension = removeExtension(archivo);
 
     //importamos el archivo de rutas
-    const routeMiddleware = require(`../router/${archivoSinExtension}`).default;
+    const routeMiddleware = require(`./../router/${archivoSinExtension}`).default;
 
     //agregamos la ruta al router
     router.use(`/${archivoSinExtension}`, routeMiddleware);
