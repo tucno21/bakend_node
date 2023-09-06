@@ -18,6 +18,7 @@ class Server {
         this.middlewares();
         //iniciar la ruta
         this.routes();
+        this.verConsolas();
     }
 
     middlewares() {
@@ -40,6 +41,19 @@ class Server {
         this.app.listen(this.port, () => {
             console.log(`Servidor corriendo en el puerto ${this.port}`);
         });
+    }
+
+    verConsolas() {
+        console.log(process.env.NAME_INIT_PATH);
+        console.log(process.env.PORT);
+        console.log(process.env.DB_HOST);
+        console.log(process.env.DB_PORT);
+        console.log(process.env.DB_DATABASE);
+        console.log(process.env.DB_USERNAME);
+        console.log(process.env.DB_PASSWORD);
+        console.log(process.env.JWT_SECRET);
+        console.log(process.env.FOLDER_NAME);
+        console.log(process.env.app_env);
     }
 }
 
