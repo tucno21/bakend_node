@@ -46,7 +46,7 @@
 - [Encriptar el password](#encriptar-el-password)
 - [Almacenar Imagenes](#almacenar-imagenes)
 - [Generar Tocken](#generar-tocken)
-- [Crear Modelos](#cear-modelos)
+- [Crear Modelos](#crear-modelos)
 - [Guardar datos](#guardar-datos)
 - [Actualizar datos](#actualizar-datos)
 - [Eliminar datos](#eliminar-datos)
