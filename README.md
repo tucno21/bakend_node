@@ -74,7 +74,7 @@
 ## RUTAS WEB
 [☝️Inicio](#cronos-backend-node.js)
 
-en la carpeta `router` crear el archivo.ts y el nombre de este archivo se parte de la ruta api
+en la carpeta `router` crear el archivo.ts y el nombre de este archivo es parte de la ruta api
 por ejemplo archivo `blogs.ts` y la url quedaria determinado de la siguiente forma
 
 ```

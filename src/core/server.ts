@@ -41,6 +41,10 @@ class Server {
     routes() {
         //inicio de las rutas
         this.app.use(AppConfig.INIT_PATH, router);
+        // Middleware para manejar rutas no encontradas
+        this.app.use((_req, res) => {
+            res.status(404).json({ error: 'Ruta no encontrada' });
+        });
     }
 
     soccket() {
