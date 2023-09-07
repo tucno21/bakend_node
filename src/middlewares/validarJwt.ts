@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-const jwt = require('jsonwebtoken');
+import jwt, { JwtPayload, JsonWebTokenError } from 'jsonwebtoken';
 
 export const validarJWT = (req: Request, res: Response, next: NextFunction): void | Response => {
     try {
@@ -7,25 +7,49 @@ export const validarJWT = (req: Request, res: Response, next: NextFunction): voi
         const token = req.header('x-token');
         if (!token) {
             return res.status(401).json({
-                ok: false,
-                msg: 'No hay token en la petición'
+                status: 'error',
+                message: 'No hay token en la petición'
             })
         }
 
-        const data = jwt.verify(token, process.env.JWT_SECRET);
+        const jwtSecret = process.env.JWT_SECRET || 'default_secret_key';
+        // const data = jwt.verify(token, jwtSecret) as JwtPayload;
+        jwt.verify(token, jwtSecret) as JwtPayload;
 
+        // En este punto, TypeScript sabe que data es del tipo JwtPayload,
+        // por lo que puedes acceder a la propiedad iat sin problemas.
+        // No es necesario eliminar iat y exp manualmente.
         //eliminar de data.iat and data.exp
-        delete data.iat;
-        delete data.exp;
+        // delete data.iat;
+        // delete data.exp;
 
         //enviar data en req
-        req.body.dataToken = data;
+        // req.body.dataToken = data;
+        // console.log({ 'desde validar token': data });
+
 
         next();
+
     } catch (error) {
-        return res.status(401).json({
-            ok: false,
-            msg: 'Token no válido',
-        })
+        if (error instanceof JsonWebTokenError) {
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'El token ha expirado',
+                });
+            } else if (error.name === 'JsonWebTokenError') {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'El token no es válido',
+                });
+            }
+        } else {
+            return res.status(401).json({
+                status: 'error',
+                message: 'error desconocido de comprobación del token',
+            })
+        }
     }
 }
+
+

@@ -2,14 +2,18 @@ import { Request, Response } from 'express';
 import Blog from '../model/blog';
 import blogEtiquetas from '../model/blogEtiquetas';
 
-export const getBlogs = async (_: Request, res: Response) => {
+export const getBlogs = async (_req: Request, res: Response) => {
     try {
         const blogs = await Blog.all()
-        return res.json(blogs);
+        return res.json({
+            status: 'success',
+            message: 'Blogs encontrados',
+            data: blogs
+        });
 
     } catch (error) {
         return res.status(500).json({
-            msg: 'Error interno del servidor'
+            message: 'Error interno del servidor'
         });
     }
 }
@@ -28,13 +32,20 @@ export const getBlog = async (req: Request, res: Response) => {
         //agregamos las etiquetas al blog
         blog.etiquetas = etiquetas;
 
-        if (!blog) return res.status(404).json({ msg: 'No existe el blog' });
+        if (!blog) return res.status(404).json({
+            status: 'error',
+            message: 'No existe el blog'
+        });
 
-        return res.json(blog);
+        return res.json({
+            status: 'success',
+            message: 'Blog encontrado',
+            data: blog
+        });
 
     } catch (error) {
         return res.status(500).json({
-            msg: 'Error interno del servidor'
+            message: 'Error interno del servidor'
         });
     }
 }
@@ -44,6 +55,8 @@ export const createBlog = async (req: Request, res: Response) => {
 
         const { titulo, contenido, usuario_id, etiquetas } = req.body;
         const blog = await Blog.create({ titulo, contenido, usuario_id });
+
+        console.log(etiquetas);
 
         //relacionamos el blog con las etiquetas
         etiquetas.forEach(async (etiqueta: string) => {
@@ -59,11 +72,16 @@ export const createBlog = async (req: Request, res: Response) => {
         //agregamos las etiquetas al blog
         blog.etiquetas = tags;
 
-        return res.json(blog);
+        return res.json({
+            status: 'success',
+            message: 'Blog creado',
+            data: blog
+        });
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
-            msg: 'Error interno del servidor'
+            message: 'Error interno del servidor'
         });
     }
 }
@@ -100,11 +118,15 @@ export const updateBlog = async (req: Request, res: Response) => {
         //agregamos las etiquetas al blog
         blog.etiquetas = tags;
 
-        return res.json(blog);
+        return res.json({
+            status: 'success',
+            message: 'Blog actualizado',
+            data: blog
+        });
 
     } catch (error) {
         return res.status(500).json({
-            msg: 'Error interno del servidor'
+            message: 'Error interno del servidor'
         });
     }
 }
@@ -113,12 +135,19 @@ export const deleteBlog = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const blog = await Blog.delete(id);
-        if (!blog) return res.status(404).json({ msg: 'No existe el blog' })
-        return res.json({ msg: 'Blog eliminado correctamente' });
+        if (!blog) return res.status(404).json({
+            status: 'error',
+            message: 'No existe el blog'
+        })
+
+        return res.json({
+            status: 'success',
+            message: 'Blog eliminado correctamente'
+        });
 
     } catch (error) {
         return res.status(500).json({
-            msg: 'Error interno del servidor'
+            message: 'Error interno del servidor'
         });
     }
 }

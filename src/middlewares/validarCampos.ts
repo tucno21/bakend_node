@@ -14,9 +14,10 @@ export const validarCampos = (req: Request, res: Response, next: NextFunction): 
         }
 
         return res.status(400).json({
-            status: false,
+            status: 'error',
             // errores: errores.mapped()
-            errores: erroresFormateados
+            message: 'Error al validar campos',
+            data: erroresFormateados
         })
     }
 

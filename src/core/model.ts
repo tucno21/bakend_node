@@ -1,8 +1,12 @@
 import { RowDataPacket } from 'mysql2';
 import db from '../database/mysql';
 
-interface CustomError extends Error {
-    code: number;
+interface MysqlError extends Error {
+    code: number | string;
+    errno: number;
+    sqlMessage: string;
+    sqlState: string;
+    sql: string;
 }
 
 class Model {
@@ -108,8 +112,10 @@ class Model {
             this.hidden.forEach((item: string) => delete data[item]);
 
             return data;
-        } catch (error: any) {
-            throw new Error(error.message);
+        } catch (error) {
+            const err = error as MysqlError;
+            if (err.code === 'ER_BAD_FIELD_ERROR') throw new Error('Error al crear el registro en la base de datos: Columna desconocida ' + err.sqlMessage);
+            throw new Error(err.message);
         }
     }
 
@@ -150,7 +156,7 @@ class Model {
             return data;
         } catch (error) {
             // throw new Error(error.message);
-            const err = error as CustomError;
+            const err = error as MysqlError;
             throw new Error(err.message);
         }
     }
